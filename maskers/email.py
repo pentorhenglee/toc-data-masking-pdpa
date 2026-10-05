@@ -1,5 +1,5 @@
 import re
-def email_masking(text):
+def mask(text):
     pattern = re.compile(r'(Email:\s*)([\w.%+-])([\w.%+-]+)([\w.%+-])(@[\w.-]+\.[A-Za-z]{2,})')
 
     text = pattern.sub(
