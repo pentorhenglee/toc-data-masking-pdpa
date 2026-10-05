@@ -27,7 +27,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
-    return "Setup works! Now go build the data-masking app. See README.md."
+    return render_template("index.html")
 
 @app.route("/knock", methods=["GET", "POST"])
 def knock():
