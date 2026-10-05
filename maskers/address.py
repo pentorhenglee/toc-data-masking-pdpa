@@ -1,6 +1,6 @@
 import re
 
-def address_masking(text):
+def mask(text):
     pattern = re.compile(r'(Address:\s*)(\S+)')
 
     text = pattern.sub(
