@@ -10,19 +10,21 @@
   <main class="workspace">
     <h1>Data Masking for PDPA</h1>
 
-    <section class="panel input-panel" aria-labelledby="input-heading">
-      <h2 id="input-heading" class="input-heading">Input</h2>
-      <label for="raw-text">RAW TEXT</label>
-      <div class="textarea-wrap">
-        <textarea id="raw-text" spellcheck="false" placeholder="Enter or paste raw text stream (e.g. Card: 4532–7566–8921–4322, Email: somchai.c@company.co.th, Phone: 089–123–4567, DOB: 25/12/2540, Address: 689 ซอยลาดกระบัง 19 กรุงเทพฯ…)"></textarea>
-        <button class="example-button" type="button">+ Example Data</button>
+    <form method="post">
+      <section class="panel input-panel" aria-labelledby="input-heading">
+        <h2 id="input-heading" class="input-heading">Input</h2>
+        <label for="raw-text">RAW TEXT</label>
+        <div class="textarea-wrap">
+          <textarea id="raw-text" name="user_text" spellcheck="false" placeholder="Enter or paste raw text stream (e.g. Card: 4532–7566–8921–4322, Email: somchai.c@company.co.th, Phone: 089–123–4567, DOB: 25/12/2540, Address: 689 ซอยลาดกระบัง 19 กรุงเทพฯ…)">{{ original }}</textarea>
+          <button class="example-button" type="button">+ Example Data</button>
+        </div>
+      </section>
+  
+      <div class="actions">
+        <a class="button button-outline" href="/" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">Clear</a>
+        <button class="button button-primary" type="submit">Mask</button>
       </div>
-    </section>
-
-    <div class="actions">
-      <button class="button button-outline" type="button">Clear</button>
-      <button class="button button-primary" type="button">Mask</button>
-    </div>
+    </form>
 
     <section class="panel output-panel" aria-labelledby="output-heading">
       <div class="output-header">
@@ -35,8 +37,9 @@
           Copy Output
         </button>
       </div>
-      <pre class="output" aria-live="polite">&gt; Awaiting data stream...</pre>
+      <pre class="output" aria-live="polite">{% if result is not none %}{{ result }}{% endif %}</pre>
     </section>
+    <footer><a href="{{ github_url }}">GitHub Repository</a></footer>
   </main>
 </body>
 </html>
