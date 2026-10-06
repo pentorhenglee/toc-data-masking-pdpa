@@ -13,12 +13,13 @@ app.py (Flask) = ตัวกลางของระบบ
 
 Run:
     python app.py
-แล้วเปิด http://127.0.0.1:5000
+แล้วเปิด http://127.0.0.1:5001
 """
 
 from flask import Flask, render_template, request
 
 from maskers import credit_card, phone, dob, email, address
+
 
 app = Flask(__name__)
 
@@ -73,7 +74,7 @@ def index():
         result=result,
         github_url=GITHUB_URL,
     )
-
+    return render_template("index.html")
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
