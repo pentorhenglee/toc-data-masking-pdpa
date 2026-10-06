@@ -15,7 +15,7 @@
         <h2 id="input-heading" class="input-heading">Input</h2>
         <label for="raw-text">RAW TEXT</label>
         <div class="textarea-wrap">
-          <textarea id="raw-text" name="text" spellcheck="false" placeholder="Enter or paste raw text stream (e.g. Card: 4532–7566–8921–4322, Email: somchai.c@company.co.th, Phone: 089–123–4567, DOB: 25/12/2540, Address: 689 ซอยลาดกระบัง 19 กรุงเทพฯ…)">{{ text }}</textarea>
+          <textarea id="raw-text" name="user_text" spellcheck="false" placeholder="Enter or paste raw text stream (e.g. Card: 4532–7566–8921–4322, Email: somchai.c@company.co.th, Phone: 089–123–4567, DOB: 25/12/2540, Address: 689 ซอยลาดกระบัง 19 กรุงเทพฯ…)">{{ original }}</textarea>
           <button class="example-button" type="button">+ Example Data</button>
         </div>
       </section>
@@ -37,8 +37,9 @@
           Copy Output
         </button>
       </div>
-      <pre class="output" aria-live="polite">{{ result }}</pre>
+      <pre class="output" aria-live="polite">{% if result is not none %}{{ result }}{% endif %}</pre>
     </section>
+    <footer><a href="{{ github_url }}">GitHub Repository</a></footer>
   </main>
 </body>
 </html>
