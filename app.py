@@ -19,14 +19,31 @@ Think through the regex yourselves - that's the whole point of the assignment.
 """
 
 from flask import Flask
+from flask import request
+from flask import render_template
 
 app = Flask(__name__)
 
 
 @app.route("/")
 def index():
-    return "Setup works! Now go build the data-masking app. See README.md."
+    return render_template("index.html")
 
+@app.route("/knock", methods=["GET", "POST"])
+def knock():
+    if request.method == "POST":
+        return "มีคนเคาะ"
+    return '<form method="post"><input name="who"><button>ส่ง</button></form>'
+
+@app.route("/greet", methods=["GET", "POST"])
+def greet():
+    if request.method == "POST":
+        return "สวัสดี" + render_template("greet.html", message="who")
+    return render_template("greet.html", message="who")
+
+@app.route("/about")
+def about():
+    return "กลุ่มของโดม"
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
