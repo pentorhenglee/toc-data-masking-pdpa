@@ -10,6 +10,7 @@
   --accent-soft: #e8edff;
   --censored: #d7262f;
   --focus: #618bde;
+  --font: "IBM Plex Sans Thai Looped", "Segoe UI", Tahoma, sans-serif;
 }
 
 html, body { overflow-x: clip; }
@@ -22,7 +23,7 @@ body {
   min-height: 100vh;
   background: var(--background);
   color: var(--blue);
-  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  font-family: var(--font);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -39,7 +40,7 @@ h1 {
   margin: 0 0 17px;
   color: var(--heading);
   font-size: 40px;
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.2;
   letter-spacing: -1.35px;
   text-align: center;
@@ -159,7 +160,7 @@ textarea::placeholder { color: var(--muted); opacity: 1; }
   border-radius: 11px;
   background: #e8edff;
   color: #8c9ebb;
-  font-family: Consolas, "Courier New", monospace;
+  font-family: var(--font);
   font-size: 15px;
   line-height: 24px;
   white-space: pre-wrap;
