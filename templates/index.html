@@ -21,7 +21,7 @@
       </section>
   
       <div class="actions">
-        <a class="button button-outline" href="/" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">Clear</a>
+        <a class="button button-outline" href="/">Clear</a>
         <button class="button button-primary" type="submit" name="action" value="mask">Mask</button>
       </div>
     </form>
@@ -34,15 +34,16 @@
             <rect x="5" y="5" width="8" height="9" rx="1.5" stroke="currentColor"/>
             <path d="M10.5 5V3.5A1.5 1.5 0 0 0 9 2H3.5A1.5 1.5 0 0 0 2 3.5V9A1.5 1.5 0 0 0 3.5 10.5H5" stroke="currentColor"/>
           </svg>
-          Copy Output
+          <span class="copy-label">Copy Output</span>
         </button>
       </div>
 
       <!-- checkbox อยู่นอก form ไม่ถูกส่งไป server ใช้แค่สลับการแสดงผลด้วย JS -->
+      <p class="toggles-hint">เลือกประเภทที่จะเซ็นเซอร์ (ติ๊กออกเพื่อดูข้อความเดิม)</p>
       <div class="toggles">
         {% for name, label in types %}
         <label class="toggle">
-          <input type="checkbox" data-type="{{ name }}">
+          <input type="checkbox" data-type="{{ name }}" checked>
           {{ label }}
           {% if counts is not none %}<span class="count">{{ counts[name] }}</span>{% endif %}
         </label>
@@ -71,7 +72,9 @@
       {%- endif -%}
       </pre>
     </section>
-    <footer><a href="{{ github_url }}">GitHub Repository</a></footer>
+    <footer class="site-footer">
+      <a href="{{ github_url }}">GitHub Repository</a>
+    </footer>
   </main>
 
   <script>
@@ -89,8 +92,14 @@
     });
 
     // innerText เอาเฉพาะตัวหนังสือที่โชว์อยู่ ไม่มี HTML และไม่มีส่วนที่ถูกซ่อน
-    document.querySelector(".copy-button").addEventListener("click", function () {
-      navigator.clipboard.writeText(output.innerText);
+    const copyButton = document.querySelector(".copy-button");
+    const copyLabel = copyButton.querySelector(".copy-label");
+
+    copyButton.addEventListener("click", function () {
+      navigator.clipboard.writeText(output.innerText).then(function () {
+        copyLabel.textContent = "Copied";
+        setTimeout(function () { copyLabel.textContent = "Copy Output"; }, 1500);
+      });
     });
   </script>
 </body>
