@@ -163,3 +163,60 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid #618bde; outli
   .panel { padding-left: 16px; padding-right: 16px; border-radius: 20px; }
   textarea { height: 160px; font-size: 16px; }
 }
+
+/* ---------- ผลลัพธ์ + สีแดง + เปิดปิดแต่ละประเภท ---------- */
+
+.output { color: #334c75; }
+.output.awaiting { color: #8c9ebb; }
+
+.censored { color: #e0262f; font-weight: 600; }
+
+/* ค่าเริ่มต้น: โชว์ข้อความเดิม ซ่อนข้อความที่เซ็นเซอร์ */
+.pii .masked { display: none; }
+
+/* ติ๊กประเภทไหน JS จะใส่ class mask-<ประเภท> ที่ .output แล้วสลับให้โชว์ข้อความที่เซ็นเซอร์ */
+.mask-credit_card .credit_card .orig,
+.mask-phone .phone .orig,
+.mask-dob .dob .orig,
+.mask-email .email .orig,
+.mask-address .address .orig { display: none; }
+
+.mask-credit_card .credit_card .masked,
+.mask-phone .phone .masked,
+.mask-dob .dob .masked,
+.mask-email .email .masked,
+.mask-address .address .masked { display: inline; }
+
+.toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #fff;
+  color: #334762;
+  font-size: 14px;
+  line-height: 20px;
+  cursor: pointer;
+}
+
+.toggle input { margin: 0; accent-color: var(--blue); }
+
+.count {
+  min-width: 22px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: #e8edff;
+  color: var(--blue);
+  font-size: 12px;
+  text-align: center;
+}

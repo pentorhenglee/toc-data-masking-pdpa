@@ -1,10 +1,10 @@
 import re
 
-def mask(text):
-    pattern = re.compile(r'(Address:\s*)(\S+)')
+PATTERN = re.compile(r'(Address:\s*)(\S+)')
 
-    text = pattern.sub(
-        lambda m: m.group(1)+ 'X' * len(m.group(2)) ,
+
+def mask(text):
+    return PATTERN.sub(
+        lambda m: m.group(1) + 'X' * len(m.group(2)),
         text
     )
-    return text

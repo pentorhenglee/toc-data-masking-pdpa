@@ -15,14 +15,14 @@
         <h2 id="input-heading" class="input-heading">Input</h2>
         <label for="raw-text">RAW TEXT</label>
         <div class="textarea-wrap">
-          <textarea id="raw-text" name="user_text" spellcheck="false" placeholder="Enter or paste raw text stream (e.g. Card: 4532–7566–8921–4322, Email: somchai.c@company.co.th, Phone: 089–123–4567, DOB: 25/12/2540, Address: 689 ซอยลาดกระบัง 19 กรุงเทพฯ…)">{{ original }}</textarea>
-          <button class="example-button" type="button">+ Example Data</button>
+          <textarea id="raw-text" name="user_text" spellcheck="false" placeholder="Enter or paste raw text stream (e.g. Card: 4532-7566-8921-4322, Email: somchai.c@company.co.th, Phone: 089-123-4567, DOB: 25/12/2540, Address: 689 ซอยลาดกระบัง 19 กรุงเทพฯ…)">{{ original }}</textarea>
+          <button class="example-button" type="submit" name="action" value="example">+ Example Data</button>
         </div>
       </section>
   
       <div class="actions">
         <a class="button button-outline" href="/" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">Clear</a>
-        <button class="button button-primary" type="submit">Mask</button>
+        <button class="button button-primary" type="submit" name="action" value="mask">Mask</button>
       </div>
     </form>
 
@@ -37,9 +37,61 @@
           Copy Output
         </button>
       </div>
-      <pre class="output" aria-live="polite">{% if result is not none %}{{ result }}{% endif %}</pre>
+
+      <!-- checkbox อยู่นอก form ไม่ถูกส่งไป server ใช้แค่สลับการแสดงผลด้วย JS -->
+      <div class="toggles">
+        {% for name, label in types %}
+        <label class="toggle">
+          <input type="checkbox" data-type="{{ name }}">
+          {{ label }}
+          {% if counts is not none %}<span class="count">{{ counts[name] }}</span>{% endif %}
+        </label>
+        {% endfor %}
+      </div>
+
+      {#
+        ทุกชิ้นต้องต่อกันโดยไม่มีช่องว่างเกิน เพราะ <pre> แสดงช่องว่างทุกตัว
+        {%- กับ -%} คือให้ Jinja ตัดช่องว่าง/ขึ้นบรรทัดใหม่ที่อยู่ติดกับ tag ทิ้ง
+      #}
+      <pre class="output{% if segments is none %} awaiting{% endif %}" id="output" aria-live="polite">
+      {%- if segments is none -%}
+        &gt; Awaiting data stream...
+      {%- else -%}
+        {%- for seg in segments -%}
+          {%- if seg.type is none -%}
+            {{ seg.text }}
+          {%- else -%}
+            <span class="pii {{ seg.type }}"><span class="orig">{{ seg.original }}</span><span class="masked">
+            {%- for piece, red in seg.parts -%}
+              {%- if red -%}<span class="censored">{{ piece }}</span>{%- else -%}{{ piece }}{%- endif -%}
+            {%- endfor -%}
+            </span></span>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+      </pre>
     </section>
     <footer><a href="{{ github_url }}">GitHub Repository</a></footer>
   </main>
+
+  <script>
+    const output = document.getElementById("output");
+    const boxes = document.querySelectorAll(".toggle input");
+
+    // ติ๊กแล้วใส่ class mask-<ประเภท> ให้ช่อง output ส่วน CSS เป็นคนสลับว่าโชว์อันไหน
+    function apply(box) {
+      output.classList.toggle("mask-" + box.dataset.type, box.checked);
+    }
+
+    boxes.forEach(function (box) {
+      apply(box);  // เผื่อเบราว์เซอร์จำสถานะ checkbox ไว้ตอนรีเฟรช
+      box.addEventListener("change", function () { apply(box); });
+    });
+
+    // innerText เอาเฉพาะตัวหนังสือที่โชว์อยู่ ไม่มี HTML และไม่มีส่วนที่ถูกซ่อน
+    document.querySelector(".copy-button").addEventListener("click", function () {
+      navigator.clipboard.writeText(output.innerText);
+    });
+  </script>
 </body>
 </html>
