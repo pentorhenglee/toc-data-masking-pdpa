@@ -1,4 +1,4 @@
-# คนเขียนไฟล์นี้: คน 4
+# คนรีวิวไฟล์นี้: คน 4
 # เทส masker ของ: คน 2 (maskers/credit_card.py)
 #
 # อ่าน tests/README.md ก่อนเริ่ม แล้วเปิด test_cases.md ที่ root หมวด "เลขบัตรเครดิต"
