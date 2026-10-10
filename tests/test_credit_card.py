@@ -6,18 +6,22 @@
 
 from maskers.credit_card import mask
 
-# TODO 1: ก๊อปเคสจาก test_cases.md หมวดเลขบัตรเครดิต มาใส่ที่นี่
-# แต่ละตัวเป็นคู่ (input, expected)
 cases = [
-    # ("1234-5678-9012-3456", "XXXX-XXXX-XXXX-3456"),
+    ("1234-5678-9012-3456", "XXXX-XXXX-XXXX-3456"),
+    ("Card 1234-5678-9012-3456 was used.", "Card XXXX-XXXX-XXXX-3456 was used."),
+    ("1234-5678-9012-3456 and 9876-5432-1098-7654", "XXXX-XXXX-XXXX-3456 and XXXX-XXXX-XXXX-7654"),
+    ("093-245-7894", "093-245-7894"),
 ]
 
-# TODO 2: เขียนลูปวนทุกเคสใน cases
-#   - เรียก mask(input) เก็บผลที่ได้ไว้
-#   - ถ้าตรงกับ expected พิมพ์ PASS
-#   - ถ้าไม่ตรง พิมพ์ FAIL พร้อมบอกว่า input คืออะไร ได้อะไรมา และควรได้อะไร
-#   - จบด้วยสรุปว่าผ่านกี่เคสจากทั้งหมดกี่เคส
-#
-# ใช้ print ธรรมดา ห้ามใช้ pytest
-#
-# ตอนรันครั้งแรกจะ FAIL หมดหรือ error เพราะยังไม่มีใครเขียน regex นั่นถูกแล้ว
+passed = 0
+for text, expected in cases:
+    got = mask(text)
+    if got == expected:
+        passed += 1
+        print("PASS", text)
+    else:
+        print("FAIL", text)
+        print("  expected:", expected)
+        print("  got:     ", got)
+
+print(f"{passed}/{len(cases)} passed")

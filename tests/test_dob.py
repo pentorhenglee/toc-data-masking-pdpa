@@ -6,18 +6,23 @@
 
 from maskers.dob import mask
 
-# TODO 1: ก๊อปเคสจาก test_cases.md หมวดวันเดือนปีเกิด มาใส่ที่นี่
-# แต่ละตัวเป็นคู่ (input, expected)
 cases = [
-    # ("DOB:25/12/2549", "DOB:XX/XX/25XX"),
+    ("DOB:25/12/2549", "DOB:XX/XX/25XX"),
+    ("Customer DOB:25/12/2549 verified", "Customer DOB:XX/XX/25XX verified"),
+    ("DOB:25/12/2549 DOB:01/01/2540", "DOB:XX/XX/25XX DOB:XX/XX/25XX"),
+    ("25/12/2549", "25/12/2549"),
+    ("Transaction date 25/12/2549", "Transaction date 25/12/2549"),
 ]
 
-# TODO 2: เขียนลูปวนทุกเคสใน cases
-#   - เรียก mask(input) เก็บผลที่ได้ไว้
-#   - ถ้าตรงกับ expected พิมพ์ PASS
-#   - ถ้าไม่ตรง พิมพ์ FAIL พร้อมบอกว่า input คืออะไร ได้อะไรมา และควรได้อะไร
-#   - จบด้วยสรุปว่าผ่านกี่เคสจากทั้งหมดกี่เคส
-#
-# ใช้ print ธรรมดา ห้ามใช้ pytest
-#
-# ตอนรันครั้งแรกจะ FAIL หมดหรือ error เพราะยังไม่มีใครเขียน regex นั่นถูกแล้ว
+passed = 0
+for text, expected in cases:
+    got = mask(text)
+    if got == expected:
+        passed += 1
+        print("PASS", text)
+    else:
+        print("FAIL", text)
+        print("  expected:", expected)
+        print("  got:     ", got)
+
+print(f"{passed}/{len(cases)} passed")
