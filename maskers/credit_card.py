@@ -10,7 +10,7 @@ import re
 # (\d{4})    : กลุ่ม 4 หลักสุดท้าย (Group 1) เพื่อเก็บไว้เป็นเลขจริง
 # (?![\d-])  : Negative lookahead - ข้างหลังต้องไม่ใช่ตัวเลขหรือขีด
 
-_CC_PATTERN = re.compile(r'(?<![\d-])\d{4}-\d{4}-\d{4}-(\d{4})(?![\d-])')
+PATTERN = re.compile(r'(?<![\d-])\d{4}-\d{4}-\d{4}-(\d{4})(?![\d-])')
 
 
 def mask(text: str) -> str:
@@ -21,4 +21,4 @@ def mask(text: str) -> str:
     if not text:
         return text
 
-    return _CC_PATTERN.sub(r'XXXX-XXXX-XXXX-\1', text)
+    return PATTERN.sub(r'XXXX-XXXX-XXXX-\1', text)

@@ -5,7 +5,15 @@
   --background: #f7f9fb;
   --border: #d4deed;
   --muted: #8a9fc1;
+  --ink: #334c75;
+  --surface: #fff;
+  --accent-soft: #e8edff;
+  --censored: #d7262f;
+  --focus: #618bde;
+  --font: "IBM Plex Sans Thai Looped", "Segoe UI", Tahoma, sans-serif;
 }
+
+html, body { overflow-x: clip; }
 
 * { box-sizing: border-box; }
 
@@ -15,7 +23,7 @@ body {
   min-height: 100vh;
   background: var(--background);
   color: var(--blue);
-  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  font-family: var(--font);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -32,7 +40,7 @@ h1 {
   margin: 0 0 17px;
   color: var(--heading);
   font-size: 40px;
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.2;
   letter-spacing: -1.35px;
   text-align: center;
@@ -107,6 +115,11 @@ textarea::placeholder { color: var(--muted); opacity: 1; }
 }
 
 .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  white-space: nowrap;
   min-width: 120px;
   height: 44px;
   padding: 0 24px;
@@ -147,7 +160,7 @@ textarea::placeholder { color: var(--muted); opacity: 1; }
   border-radius: 11px;
   background: #e8edff;
   color: #8c9ebb;
-  font-family: Consolas, "Courier New", monospace;
+  font-family: var(--font);
   font-size: 15px;
   line-height: 24px;
   white-space: pre-wrap;
@@ -161,5 +174,94 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid #618bde; outli
   .workspace { width: calc(100% - 28px); padding-top: 32px; }
   h1 { font-size: clamp(23px, 6.5vw, 30px); letter-spacing: -.9px; margin-bottom: 22px; }
   .panel { padding-left: 16px; padding-right: 16px; border-radius: 20px; }
-  textarea { height: 160px; font-size: 16px; }
+  textarea { height: 160px; font-size: 16px; padding-bottom: 12px; }
+  /* จอแคบ ข้อความเต็มช่อง ปุ่มที่ลอยอยู่มุมล่างจะทับบรรทัดสุดท้าย เลยย้ายลงไปใต้ช่องแทน */
+  .textarea-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+  .example-button { position: static; }
 }
+
+/* ---------- ผลลัพธ์ + สีแดง + เปิดปิดแต่ละประเภท ---------- */
+
+.output { color: var(--ink); }
+.output.awaiting { color: #8c9ebb; }
+
+.censored { color: var(--censored); font-weight: 600; }
+
+/* ค่าเริ่มต้น: โชว์ข้อความเดิม ซ่อนข้อความที่เซ็นเซอร์ */
+.pii .masked { display: none; }
+
+/* ติ๊กประเภทไหน JS จะใส่ class mask-<ประเภท> ที่ .output แล้วสลับให้โชว์ข้อความที่เซ็นเซอร์ */
+.mask-credit_card .credit_card .orig,
+.mask-phone .phone .orig,
+.mask-dob .dob .orig,
+.mask-email .email .orig,
+.mask-address .address .orig { display: none; }
+
+.mask-credit_card .credit_card .masked,
+.mask-phone .phone .masked,
+.mask-dob .dob .masked,
+.mask-email .email .masked,
+.mask-address .address .masked { display: inline; }
+
+.toggles-hint {
+  margin: 14px 0 8px;
+  color: #465b7f;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: #334762;
+  font-size: 14px;
+  line-height: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.toggle:hover { border-color: var(--muted); }
+.toggle:has(input:checked) { border-color: var(--blue); background: var(--accent-soft); }
+.toggle:focus-within { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+.toggle input { margin: 0; accent-color: var(--blue); }
+
+.count {
+  min-width: 22px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--blue);
+  font-size: 12px;
+  text-align: center;
+}
+
+.toggle:has(input:checked) .count { background: var(--surface); }
+
+a:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+
+.site-footer {
+  margin-top: 28px;
+  text-align: center;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.site-footer a {
+  color: var(--heading);
+  text-underline-offset: 3px;
+}
+
+.site-footer a:hover { color: var(--blue); }

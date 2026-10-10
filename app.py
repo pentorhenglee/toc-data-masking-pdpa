@@ -1,20 +1,25 @@
 """
 app.py (Flask) = ตัวกลางของระบบ
 
-
-ไอพวกงาน 8 (index.html) งาน 9 (แสดงผล/CSS):
+ข้อตกลงกับ index.html:
   - ช่องกรอก (<textarea>) ต้องมี name="user_text"
-  - template ได้ตัวแปร 3 ตัว:
+  - ปุ่มส่ง form มี name="action" ค่าเป็น "mask" หรือ "example"
+  - template ได้ตัวแปร:
         original   ข้อความเดิมที่ผู้ใช้พิมพ์ ("" ตอนเปิดหน้าครั้งแรก)
-        result     ข้อความที่เซ็นเซอร์แล้ว (None ตอนเปิดหน้าครั้งแรก)
+        segments   ข้อความที่หั่นเป็นชิ้นแล้ว (None = ยังไม่ได้กด Mask)
+        counts     จำนวนที่เจอแยกตามประเภท เช่น {"phone": 1, ...}
+        types      รายชื่อประเภท [(ชื่อ, ชื่อที่โชว์), ...] ใช้ทำ checkbox
         github_url ลิงก์ GitHub ที่หน้าเว็บต้องมี (โจทย์บังคับ)
-    ใช้ {% if result is not none %} เช็กว่าเพิ่งกดส่งหรือยัง
-    (อย่าใช้ {% if result %} เพราะข้อความว่างที่เซ็นเซอร์แล้วก็ต้องแสดงผลได้)
+
+ข้อตกลงกับ maskers/*.py:
+  - ทุกไฟล์มี PATTERN (regex ที่ compile แล้ว) และฟังก์ชัน mask(text)
 
 Run:
     python app.py
 แล้วเปิด http://127.0.0.1:5001
 """
+
+import re
 
 from flask import Flask, render_template, request
 
@@ -23,58 +28,123 @@ from maskers import credit_card, phone, dob, email, address
 
 app = Flask(__name__)
 
-# ชื่อ name ของ <textarea> ใน index.html ต้องตรงกับค่านี้ (งาน 8 มาอ่านดิ๊)
 INPUT_FIELD = "user_text"
 
-# ลิงก์ GitHub ของพรี่เป็นต่อ ที่โจทย์บังคับให้มีบนหน้าเว็บ ส่งไปให้ template ใช้
 GITHUB_URL = "https://github.com/pentorhenglee/toc-data-masking-pdpa"
 
-# ลำดับการเรียก mask ตามขั้นตอนในชีตงาน
+# (ชื่อประเภท, ชื่อที่โชว์บนหน้าเว็บ, ไฟล์ masker)
 MASKERS = [
-    ("credit_card", credit_card),
-    ("phone", phone),
-    ("dob", dob),
-    ("email", email),
-    ("address", address),
+    ("credit_card", "บัตรเครดิต", credit_card),
+    ("phone", "เบอร์โทร", phone),
+    ("dob", "วันเกิด", dob),
+    ("email", "อีเมล", email),
+    ("address", "ที่อยู่", address),
 ]
 
+TYPES = [(name, label) for name, label, module in MASKERS]
 
-def mask_all(text):
-    """ส่งข้อความผ่าน mask() ของทั้ง 5 ไฟล์ต่อกัน แล้วคืนข้อความที่ปิดครบแล้ว"""
-    for name, module in MASKERS:
-        mask_fn = getattr(module, "mask", None)
-        if mask_fn is None:
-            print(f"[app.py] maskers/{name}.py ยังไม่มีฟังก์ชัน mask() -> ข้าม")
+# ข้อความตัวอย่างของปุ่ม Example = เคสรวมใน test_cases.md (มีครบ 5 ประเภท)
+EXAMPLE_TEXT = (
+    "Customer somchai.d@company.com called from 093-245-7894 "
+    "regarding card 1234-5678-9012-3456. DOB:25/12/2549 "
+    "Address: 689 ซอยลาดกระบัง 19 ถนนลาดกระบัง แขวงลาดกระบัง เขตลาดกระบัง กรุงเทพฯ"
+)
+
+# ส่วนที่ถูกเซ็นเซอร์ = X หรือ * ติดกัน ที่อาจมี - หรือ / คั่นตรงกลาง
+# เช่น XXXX-XXXX-XXXX, XX/XX, *******
+RED_PATTERN = re.compile(r"[X*]+(?:[-/][X*]+)*")
+
+
+def split_red(masked):
+    """หั่นข้อความที่เซ็นเซอร์แล้วเป็นชิ้น ๆ แต่ละชิ้นบอกว่าต้องเป็นสีแดงไหม
+
+    "XXX-XXX-7894" -> [("XXX-XXX", True), ("-7894", False)]
+    """
+    parts = []
+    pos = 0
+    for m in RED_PATTERN.finditer(masked):
+        if m.start() > pos:
+            parts.append((masked[pos:m.start()], False))
+        parts.append((m.group(), True))
+        pos = m.end()
+    if pos < len(masked):
+        parts.append((masked[pos:], False))
+    return parts
+
+
+def find_pii(text):
+    """ใช้ PATTERN ของทั้ง 5 ไฟล์หาทุกจุดในข้อความเดิม แล้วเรียงตามตำแหน่ง
+
+    คืนค่าเป็น list ของ (ตำแหน่งเริ่ม, ตำแหน่งจบ, ชื่อประเภท, ไฟล์ masker)
+    """
+    found = []
+    for name, label, module in MASKERS:
+        for m in module.PATTERN.finditer(text):
+            found.append((m.start(), m.end(), name, module))
+    found.sort(key=lambda f: f[0])
+    return found
+
+
+def build_segments(text):
+    """หั่นข้อความทั้งก้อนเป็นชิ้น ๆ ให้ template วนลูปแสดงผล
+
+    ชิ้นธรรมดา      {"type": None, "text": "..."}
+    ชิ้นที่ต้องปิด   {"type": "phone", "original": "093-245-7894",
+                    "parts": [("XXX-XXX", True), ("-7894", False)]}
+    """
+    segments = []
+    counts = {name: 0 for name, label, module in MASKERS}
+    pos = 0
+
+    for start, end, name, module in find_pii(text):
+        # ทับกับจุดก่อนหน้า (เคสในโจทย์ไม่มี) ใช้อันที่เจอก่อน
+        if start < pos:
             continue
-        text = mask_fn(text)
-    return text
+
+        if start > pos:
+            segments.append({"type": None, "text": text[pos:start]})
+
+        original = text[start:end]
+        segments.append({
+            "type": name,
+            "original": original,
+            "parts": split_red(module.mask(original)),
+        })
+        counts[name] += 1
+        pos = end
+
+    if pos < len(text):
+        segments.append({"type": None, "text": text[pos:]})
+
+    return segments, counts
 
 
-# route เดียวรับทั้ง GET (เปิดหน้า) และ POST (กดปุ่ม)
 @app.route("/", methods=["GET", "POST"])
 def index():
     original = ""
-    result = None
+    segments = None
+    counts = None
 
     if request.method == "POST":
-        # ดึงข้อความที่ผู้ใช้พิมพ์ ใช้ .get พร้อมค่า default
-        original = request.form.get(INPUT_FIELD, "")
+        action = request.form.get("action", "mask")
 
-        # เบราว์เซอร์ส่งการขึ้นบรรทัดใหม่ใน <textarea> มาเป็น \r\n
-        # แปลงเป็น \n เพื่อให้ masker ทุกตัวเจอรูปแบบเดียวกัน
-        original = original.replace("\r\n", "\n")
-
-        print("[app.py] รับข้อความ:", repr(original))  # debug: ดูใน terminal
-
-        result = mask_all(original)
+        if action == "example":
+            original = EXAMPLE_TEXT
+        else:
+            original = request.form.get(INPUT_FIELD, "")
+            # เบราว์เซอร์ส่งการขึ้นบรรทัดใหม่มาเป็น \r\n แปลงเป็น \n ให้เหมือนกันหมด
+            original = original.replace("\r\n", "\n")
+            segments, counts = build_segments(original)
 
     return render_template(
         "index.html",
         original=original,
-        result=result,
+        segments=segments,
+        counts=counts,
+        types=TYPES,
         github_url=GITHUB_URL,
     )
-    return render_template("index.html")
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
