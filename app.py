@@ -20,6 +20,14 @@ Run:
 """
 
 import re
+from flask import request, jsonify
+import io
+from PIL import Image, ImageOps, UnidentifiedImageError
+import pytesseract
+
+pytesseract.pytesseract.tesseract_cmd = (
+    r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+)
 
 from flask import Flask, render_template, request
 
@@ -145,6 +153,40 @@ def index():
         github_url=GITHUB_URL,
     )
 
+
+@app.route("/ocr", methods=["POST"])
+def ocr():
+    uploaded_file = request.files.get("image")
+
+    if not uploaded_file or not uploaded_file.filename:
+        return jsonify({"error": "กรุณาเลือกไฟล์ภาพ"}), 400
+
+    try:
+        image_bytes = uploaded_file.read()
+
+        # จำกัดขนาดไฟล์ไม่เกิน 5 MB
+        if len(image_bytes) > 5 * 1024 * 1024:
+            return jsonify({"error": "ไฟล์ภาพต้องมีขนาดไม่เกิน 5 MB"}), 413
+
+        with Image.open(io.BytesIO(image_bytes)) as image:
+            image = ImageOps.exif_transpose(image)
+            image = image.convert("RGB")
+
+            text = pytesseract.image_to_string(
+                image,
+                lang="tha+eng"
+            ).strip()
+
+        return jsonify({"text": text})
+
+    except UnidentifiedImageError:
+        return jsonify({"error": "ไฟล์ที่อัปโหลดไม่ใช่ภาพที่รองรับ"}), 400
+
+    except pytesseract.TesseractNotFoundError:
+        return jsonify({"error": "ไม่พบ Tesseract OCR ในระบบ"}), 500
+
+    except pytesseract.TesseractError:
+        return jsonify({"error": "เกิดข้อผิดพลาดระหว่าง OCR"}), 500
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
