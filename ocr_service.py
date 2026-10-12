@@ -20,16 +20,12 @@ def extract_text(image_path):
         raise ValueError("Unsupported image format")
 
     with Image.open(path) as image:
-        # แก้ภาพที่ถ่ายกลับหัวจากข้อมูล EXIF
-        image = ImageOps.exif_transpose(image)
-
-        # แปลง PIL Image เป็น NumPy array แบบ RGB
+        
+        image = ImageOps.exif_transpose(image)   
         image = np.array(image.convert("RGB"))
 
-    # RGB -> Grayscale
     image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 
-    # ขยายภาพ 2 เท่า
     image = cv2.resize(
         image,
         None,
@@ -38,10 +34,8 @@ def extract_text(image_path):
         interpolation=cv2.INTER_CUBIC
     )
 
-    # ลด noise โดยรักษาขอบตัวอักษร
     image = cv2.bilateralFilter(image, 9, 75, 75)
 
-    # ปรับพื้นหลังและตัวอักษรให้แยกกันชัดขึ้น
     image = cv2.adaptiveThreshold(cv2.bilateralFilter(image, 9, 75, 75), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 2)
 
     config = (

@@ -30,7 +30,7 @@ import os
 import pytesseract
 import shutil
 
-# กำหนด path ของ Tesseract ภายใน Docker (Linux)
+
 pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 from flask import Flask, render_template, request
