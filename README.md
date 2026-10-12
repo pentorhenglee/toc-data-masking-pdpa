@@ -3,9 +3,16 @@
 A web app that takes bank-log text containing leaked personal data and **censors it
 using Python regex (`re` module only)**.
 
-> This repo is intentionally a bare Flask starter. The masking logic, the form, and
-> the design are **not** written yet — that's our job.
-> the point of the assignment is to work out the regex ourselves.
+Live: https://toc-data-masking-pdpa.vercel.app
+
+## Team & Roles
+
+| Role | หน้าที่ | รหัสนักศึกษา |
+|------|--------|-------------|
+| Coordinator | วางระบบ แบ่งงาน รวมโค้ดทุกส่วน และ deploy เว็บ | 67010585 |
+| Maskers and Test | 5 คน คนละประเภท เขียน regex ในไฟล์ของตัวเองใน `maskers/` และรีวิวไฟล์เทส | 67010686, 67010522, 67011569, 67010207, 67010500 |
+| Backend + Frontend | `app.py` เชื่อม masker ทั้ง 5 กับหน้าเว็บ ด้วย HTML/CSS | 67010465, 67010493, 67010500 |
+| UX/UI | ดีไซน์ สไลด์ และตัดคลิป | 67010482 |
 
 ---
 
