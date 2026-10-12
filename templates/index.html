@@ -33,6 +33,7 @@
       <div class="import-image">
         <label for="image-input">IMPORT IMAGE</label>
         <p id="ocr-status" role="status"></p>
+        
         <div class="upload-area">
           <span class="image-icon" aria-hidden="true">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -41,7 +42,9 @@
               <path d="m5 15 4-4 4 4 2-2 4 4"/>
             </svg>
           </span>
+         
           <div class="upload-description">
+             
             <span class="upload-title">อัปโหลด / ลากไฟล์รูปภาพ</span>
             <span class="upload-hint" id="file-hint">JPG, PNG, WEBP หรือ PDF (สูงสุด 10MB)</span>
           </div>
@@ -155,6 +158,16 @@ const extractButton = document.getElementById("extract-button");
 const ocrStatus = document.getElementById("ocr-status");
 const rawText = document.getElementById("raw-text");
 
+imageInput.addEventListener("change", function () {
+  const file = imageInput.files[0];
+
+  if (file) {
+    ocrStatus.textContent = `Selected file: ${file.name}`;
+  } else {
+    ocrStatus.textContent = "";
+  }
+});
+
 extractButton.addEventListener("click", async function () {
   const file = imageInput.files[0];
 
@@ -186,6 +199,7 @@ extractButton.addEventListener("click", async function () {
     ocrStatus.textContent = result.text
       ? "Text extracted. Review it before masking."
       : "No text detected.";
+
   } catch (error) {
     ocrStatus.textContent = error.message;
   } finally {
