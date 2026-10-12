@@ -19,16 +19,18 @@ Run:
 แล้วเปิด http://127.0.0.1:5001
 """
 
-import os
 import re
+import shutil
 from flask import request, jsonify
 import io
 from PIL import Image, ImageOps, UnidentifiedImageError
 import pytesseract
 
-pytesseract.pytesseract.tesseract_cmd = (
-    r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-)
+import pytesseract
+import shutil
+
+# กำหนด path ของ Tesseract ภายใน Docker (Linux)
+pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 from flask import Flask, render_template, request
 
@@ -58,21 +60,6 @@ EXAMPLE_TEXT = (
     "regarding card 1234-5678-9012-3456. DOB:25/12/2549 "
     "Address: 689 ซอยลาดกระบัง 19 ถนนลาดกระบัง แขวงลาดกระบัง เขตลาดกระบัง กรุงเทพฯ"
 )
-
-# ไฟล์ตัวอย่างให้ดาวน์โหลดในหน้า /examples (อยู่ใน static/examples)
-# (ชื่อไฟล์, หัวข้อ, คำอธิบาย) เนื้อหาเอามาจาก test_cases.md
-EXAMPLES_DIR = os.path.join(app.static_folder, "examples")
-EXAMPLES = [
-    ("all_types.txt", "รวมครบ 5 ประเภท", "ข้อความเดียวมีบัตรเครดิต เบอร์โทร วันเกิด อีเมล และที่อยู่"),
-    ("credit_card.txt", "บัตรเครดิต", "เลขบัตรในประโยค หลายใบ และเบอร์โทรที่ต้องไม่โดนแตะ"),
-    ("phone.txt", "เบอร์โทร", "เบอร์ในประโยค หลายเบอร์ และเลขบัตร/เลขบัญชีที่ต้องไม่โดนแตะ"),
-    ("dob.txt", "วันเกิด", "DOB: ปกติ หลายอัน และวันที่ที่ไม่มี DOB: นำหน้า"),
-    ("email.txt", "อีเมล", "อีเมลในประโยค โดเมนหลายชั้น และหลายอัน"),
-    ("address.txt", "ที่อยู่", "มีซอย ไม่มีซอย เลขที่บ้านหลักเดียว และไม่มี Address: นำหน้า"),
-    ("mixed.txt", "เคสปนกัน", "หลายประเภทอยู่ติดกัน และบรรทัดที่ไม่มีข้อมูลส่วนบุคคล"),
-    ("ocr_sample.png", "รูปภาพสำหรับ OCR", "ใช้ทดสอบปุ่ม Import Image แล้วกด Extract Text"),
-    ("OCR_CARD.png", "รูปบัตรสำหรับ OCR", "รูปบัตรเครดิตพื้นสี มีเลขบัตร ที่อยู่ วันเกิด อีเมล และเบอร์โทร"),
-]
 
 # ส่วนที่ถูกเซ็นเซอร์ = X หรือ * ติดกัน ที่อาจมี - หรือ / คั่นตรงกลาง
 # เช่น XXXX-XXXX-XXXX, XX/XX, *******
@@ -170,24 +157,6 @@ def index():
     )
 
 
-@app.route("/examples")
-def examples():
-    files = []
-    for filename, title, description in EXAMPLES:
-        preview = None
-        if filename.endswith(".txt"):
-            with open(os.path.join(EXAMPLES_DIR, filename), encoding="utf-8") as f:
-                preview = f.read()
-        files.append({
-            "filename": filename,
-            "title": title,
-            "description": description,
-            "preview": preview,
-        })
-
-    return render_template("examples.html", files=files, github_url=GITHUB_URL)
-
-
 @app.route("/ocr", methods=["POST"])
 def ocr():
     uploaded_file = request.files.get("image")
@@ -223,4 +192,4 @@ def ocr():
         return jsonify({"error": "เกิดข้อผิดพลาดระหว่าง OCR"}), 500
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5001)
+    app.run(host="0.0.0.0", port=5000, debug=False)
