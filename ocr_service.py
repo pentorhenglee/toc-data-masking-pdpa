@@ -29,12 +29,12 @@ def extract_text(image_path):
     # RGB -> Grayscale
     image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 
-    # ขยายภาพ 1.5 เท่า
+    # ขยายภาพ 2 เท่า
     image = cv2.resize(
         image,
         None,
-        fx=2,
-        fy=2,
+        fx=3,
+        fy=3,
         interpolation=cv2.INTER_CUBIC
     )
 
