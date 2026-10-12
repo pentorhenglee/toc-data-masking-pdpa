@@ -1,0 +1,5 @@
+DOB:25/12/2549
+Customer DOB:25/12/2549 verified
+DOB:25/12/2549 DOB:01/01/2540
+25/12/2549
+Transaction date 25/12/2549

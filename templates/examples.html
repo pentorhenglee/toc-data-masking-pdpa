@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Examples · Data Masking for PDPA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a class="nav-brand" href="/">PDPA Masking</a>
+    <div class="nav-links">
+      <a href="/">Mask</a>
+      <a href="/examples" aria-current="page">Examples</a>
+    </div>
+  </nav>
+
+  <main class="workspace">
+    <h1>Example Files</h1>
+    <p class="page-intro">กด Copy Text แล้วนำข้อความไปวางในหน้า <a href="/">Mask</a> หรือดาวน์โหลดรูปไปอัปโหลดในช่อง Import Image</p>
+
+    <ul class="example-list">
+      {% for file in files %}
+      <li class="panel example-card">
+        <div class="example-header">
+          <div>
+            <h2>{{ file.title }}</h2>
+            <p class="example-desc">{{ file.description }}</p>
+          </div>
+          {% if file.preview is not none %}
+          <button class="button button-outline download-button copy-example" type="button">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <rect x="5" y="5" width="8" height="9" rx="1.5" stroke="currentColor"/>
+              <path d="M10.5 5V3.5A1.5 1.5 0 0 0 9 2H3.5A1.5 1.5 0 0 0 2 3.5V9A1.5 1.5 0 0 0 3.5 10.5H5" stroke="currentColor"/>
+            </svg>
+            <span class="copy-label">Copy Text</span>
+          </button>
+          {% else %}
+          <a class="button button-outline download-button" href="/static/examples/{{ file.filename }}" download>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 4v11m-5-5 5 5 5-5M5 20h14"/>
+            </svg>
+            {{ file.filename }}
+          </a>
+          {% endif %}
+        </div>
+        {% if file.preview is not none %}
+        <pre class="output example-preview">{{ file.preview }}</pre>
+        {% else %}
+        <img class="example-image" src="/static/examples/{{ file.filename }}" alt="{{ file.title }}">
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+
+    <footer class="site-footer">
+      <a href="{{ github_url }}">GitHub Repository</a>
+    </footer>
+  </main>
+
+  <script>
+    // กด Copy แล้วก๊อปข้อความใน <pre> ของการ์ดใบเดียวกัน
+    document.querySelectorAll(".copy-example").forEach(function (button) {
+      const label = button.querySelector(".copy-label");
+      const preview = button.closest(".example-card").querySelector(".example-preview");
+
+      button.addEventListener("click", function () {
+        navigator.clipboard.writeText(preview.textContent.trim()).then(function () {
+          label.textContent = "Copied";
+          setTimeout(function () { label.textContent = "Copy Text"; }, 1500);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
