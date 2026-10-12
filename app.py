@@ -25,6 +25,7 @@ from flask import request, jsonify
 import io
 from PIL import Image, ImageOps, UnidentifiedImageError
 import pytesseract
+import os
 
 import pytesseract
 import shutil
@@ -64,6 +65,19 @@ EXAMPLE_TEXT = (
 # ส่วนที่ถูกเซ็นเซอร์ = X หรือ * ติดกัน ที่อาจมี - หรือ / คั่นตรงกลาง
 # เช่น XXXX-XXXX-XXXX, XX/XX, *******
 RED_PATTERN = re.compile(r"[X*]+(?:[-/][X*]+)*")
+
+EXAMPLES_DIR = os.path.join(app.static_folder, "examples")
+EXAMPLES = [
+    ("all_types.txt", "รวมครบ 5 ประเภท", "ข้อความเดียวมีบัตรเครดิต เบอร์โทร วันเกิด อีเมล และที่อยู่"),
+    ("credit_card.txt", "บัตรเครดิต", "เลขบัตรในประโยค หลายใบ และเบอร์โทรที่ต้องไม่โดนแตะ"),
+    ("phone.txt", "เบอร์โทร", "เบอร์ในประโยค หลายเบอร์ และเลขบัตร/เลขบัญชีที่ต้องไม่โดนแตะ"),
+    ("dob.txt", "วันเกิด", "DOB: ปกติ หลายอัน และวันที่ที่ไม่มี DOB: นำหน้า"),
+    ("email.txt", "อีเมล", "อีเมลในประโยค โดเมนหลายชั้น และหลายอัน"),
+    ("address.txt", "ที่อยู่", "มีซอย ไม่มีซอย เลขที่บ้านหลักเดียว และไม่มี Address: นำหน้า"),
+    ("mixed.txt", "เคสปนกัน", "หลายประเภทอยู่ติดกัน และบรรทัดที่ไม่มีข้อมูลส่วนบุคคล"),
+    ("ocr_sample.png", "รูปภาพสำหรับ OCR", "ใช้ทดสอบปุ่ม Import Image แล้วกด Extract Text"),
+    ("OCR_CARD.png", "รูปบัตรสำหรับ OCR", "รูปบัตรเครดิตพื้นสี มีเลขบัตร ที่อยู่ วันเกิด อีเมล และเบอร์โทร"),
+]
 
 
 def split_red(masked):
@@ -190,6 +204,23 @@ def ocr():
 
     except pytesseract.TesseractError:
         return jsonify({"error": "เกิดข้อผิดพลาดระหว่าง OCR"}), 500
+
+@app.route("/examples")
+def examples():
+    files = []
+    for filename, title, description in EXAMPLES:
+        preview = None
+        if filename.endswith(".txt"):
+            with open(os.path.join(EXAMPLES_DIR, filename), encoding="utf-8") as f:
+                preview = f.read()
+        files.append({
+            "filename": filename,
+            "title": title,
+            "description": description,
+            "preview": preview,
+        })
+
+    return render_template("examples.html", files=files, github_url=GITHUB_URL)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
