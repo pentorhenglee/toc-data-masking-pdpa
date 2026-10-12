@@ -6,11 +6,11 @@ import re
 #
 # คำอธิบาย Regular Expression:
 # (?<![\d-]) : Negative lookbehind - ข้างหน้าต้องไม่ใช่ตัวเลขหรือขีด เพื่อไม่ให้จับส่วนท้ายของเลขที่ยาวกว่า
-# \d{4}-\d{4}-\d{4}- : เลข 4 หลัก 3 กลุ่มแรกคั่นด้วยขีด
+# (?:\d{4}-){3} : เลข 4 หลักคั่นด้วยขีด ซ้ำ 3 กลุ่ม (Non-capturing group)
 # (\d{4})    : กลุ่ม 4 หลักสุดท้าย (Group 1) เพื่อเก็บไว้เป็นเลขจริง
 # (?![\d-])  : Negative lookahead - ข้างหลังต้องไม่ใช่ตัวเลขหรือขีด
 
-_CC_PATTERN = re.compile(r'(?<![\d-])\d{4}-\d{4}-\d{4}-(\d{4})(?![\d-])')
+PATTERN = re.compile(r'(?<![\d-])(?:\d{4}-){3}(\d{4})(?![\d-])')
 
 
 def mask(text: str) -> str:
@@ -21,4 +21,4 @@ def mask(text: str) -> str:
     if not text:
         return text
 
-    return _CC_PATTERN.sub(r'XXXX-XXXX-XXXX-\1', text)
+    return PATTERN.sub(r'XXXX-XXXX-XXXX-\1', text)
